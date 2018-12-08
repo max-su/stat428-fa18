@@ -1,0 +1,25 @@
+---
+title: 'STAT 428: Final Project'
+author: "Akshay Mahesh (mahesh4), Max Su (maxsu2), Adam Zhang(ajzhang2), Nicholas Costello (nicoste2), Kasi Manikumar (manikum2)"
+date: "Due Week 14 Saturday, December 1 by 11.59 PM on Compass"
+output:
+  html_document:
+    theme: readable
+    toc: yes
+  pdf_document:
+    toc: yes
+---
+
+
+```{r setup, echo = FALSE, message = FALSE, warning = FALSE}
+options(scipen = 1, digits = 4, width = 80)
+```
+
+---------------------------------------
+
+1. When using external packages, please mention clearly what R packages you are using so that we can install those when running your codes. Furthermore, please call the package in your code using the "library" function so that your code shows no error when running.
+
+---------------------------------------
+
+```{r,eval=TRUE, echo=TRUE, include=TRUE}
+```

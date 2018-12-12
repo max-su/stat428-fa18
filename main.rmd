@@ -10,16 +10,74 @@ output:
     toc: yes
 ---
 
+# Abstract
+
+TODO
+
+# Introduction
+
+Kruskal's Count is a mathematical magic card trick that we will optimize for the highest chances of success given two parameters: the royal card count value (Jack, Queen, King) and the number the magician should pick for the best chance of success of performing this trick with a non-robotic victim .
+
+## Card Trick
+
+Instructions for the victim: The victim shuffles a deck thoroughly, then secretly picks a number between 1 and 10. The cards are dealt out slowly and steadily, face up, the victim's first key card being the one at the position they choose in advance. The value of this card determines how many to deal out to the next key card, e.g., if the key card is a 4 victim counts off four cards, the last being the new key card. Royal cards count as 5. The process is repeated as often as is possible.
+
+Eventually they will get a *key card* (perhaps the last card in the deck) which is not followed by enough cards to get to another one; this last key card is the one they remember. No matter how steadily the victim deals, with no pauses to give any hints as to which cards are key cards, you successfully identify their last key card. For many people, this trick grows more mysterious with repetition.
+
+Magician's method: The magician mirrors the same instructions as the victim, also picking some random card among the first ten until arriving at the last key card. There's a very high probability that both the magician and the victim come to the same final key card because when the magician and the victim both come to the same card at any point in time, they will also arrive at the last key card.
+
+
+
 
 ```{r setup, echo = FALSE, message = FALSE, warning = FALSE}
 options(scipen = 1, digits = 4, width = 80)
+library(hashmap)
 ```
 
----------------------------------------
-
-1. When using external packages, please mention clearly what R packages you are using so that we can install those when running your codes. Furthermore, please call the package in your code using the "library" function so that your code shows no error when running.
-
----------------------------------------
 
 ```{r,eval=TRUE, echo=TRUE, include=TRUE}
+human_distribution <- function(n){
+  setwd('.')
+  data = as.vector(read.csv(file="data.csv",check.names=FALSE, header=FALSE))
+
+  estimators = numeric(10)
+  for(i in 1:10){
+    estimators[i] = sum(data <= i) / length(data)
+  }
+  estimators = c(0, estimators)
+
+  sample = c()
+  for(i in 1:n){
+    x = runif(n = 1, min = 0, max = 1)
+    sample = c(sum(estimators < x),sample)
+  }
+  return(sample)
+}
 ```
+
+```{r,eval=TRUE, echo=TRUE, include=TRUE}
+ranks <- c("A",2:10,"J","Q","K")
+cards = paste(rep(ranks, 4), c("H","D","S","C"))
+
+# Create a randomized deck of cards.
+create_shuffled_deck <- function() {
+  sample(cards, 52)
+}
+
+# Create a rank value hashmap.
+create_rank_value_map <- function(jack_val, queen_val, king_val) {
+  hashmap(ranks, c(c(1:10), jack_val, queen_val, king_val))
+}
+
+# Function to get the value of the card.
+card_value <- function(card, rv_map) {
+  rank <- unlist(strsplit(card, " "))[1] # "A H" -> "A"
+  rv_map[[rank]]
+}
+
+rv_map <- create_rank_value_map(5, 5, 5)
+card_value("10 H", rv_map)
+```
+
+
+http://www.ams.org/publicoutreach/feature-column/fcarc-mulcahy6

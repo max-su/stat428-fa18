@@ -65,8 +65,8 @@ create_shuffled_deck <- function() {
 }
 
 # Create a rank value hashmap.
-create_rank_value_map <- function(jack_val, queen_val, king_val) {
-  hashmap(ranks, c(c(1:10), jack_val, queen_val, king_val))
+create_rank_value_map <- function(jack_value, queen_value, king_value) {
+  hashmap(ranks, c(c(1:10), jack_value, queen_value, king_value))
 }
 
 # Function to get the value of the card.
@@ -77,6 +77,24 @@ card_value <- function(card, rv_map) {
 
 rv_map <- create_rank_value_map(5, 5, 5)
 card_value("10 H", rv_map)
+```
+
+```{r,eval=TRUE, echo=TRUE, include=TRUE}
+calc_key_card <- function(deck, rv_map, start_idx) {
+  curr_card <- deck[start_idx]
+  index <- start_idx
+  
+  while(index + card_value(curr_card, rv_map) <= 52) {
+    index <- index + card_value(curr_card, rv_map)
+    curr_card <- deck[index]
+  }
+  return(curr_card)
+}
+
+deck <- create_shuffled_deck()
+rv_map <- create_rank_value_map(5, 5, 5)
+calc_key_card(deck, rv_map, 1)
+calc_key_card(deck, rv_map, 2)
 ```
 
 

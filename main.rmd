@@ -80,6 +80,8 @@ card_value("10 H", rv_map)
 ```
 
 ```{r,eval=TRUE, echo=TRUE, include=TRUE}
+# Calculates the key card (perhaps the last card in the deck) which is not followed by enough cards to get to another one.
+# Given an initital deck, a rank value map, and the initial number from 1-10.
 calc_key_card <- function(deck, rv_map, start_idx) {
   curr_card <- deck[start_idx]
   index <- start_idx

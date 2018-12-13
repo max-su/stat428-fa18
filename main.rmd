@@ -95,9 +95,54 @@ calc_key_card <- function(deck, rv_map, start_idx) {
 
 deck <- create_shuffled_deck()
 rv_map <- create_rank_value_map(5, 5, 5)
+
 calc_key_card(deck, rv_map, 1)
-calc_key_card(deck, rv_map, 2)
+calc_key_card(deck, rv_map, 5)
 ```
 
+```{r}
+#one dimension optimization of mean average card value
+fx <- seq(1, 10, 1)
+fy <- 1-((fx^2-1)/fx^2)^52
+plot(fx, fy)
+#from the plot we see the maximum is achieved on the interval (1,4)
+
+success_function_standard_deck <- function(x) {
+  1-((x^2-1)/x^2)^52
+}
+
+optim_average_card_val = optimize(success_function_standard_deck, lower=1, upper = 10, maximum = TRUE)$maximum
+optim_average_card_val
+
+## its unrealistic to reduce all cards values close to 1, thus, we set the lower bound of the optimization to be the card average when face cards are counted as value 1
+
+optim_average_realistic_card_val = optimize(success_function_standard_deck, lower=4.46, upper = 10, maximum = TRUE)$maximum
+optim_average_realistic_card_val
+```
+
+```{r}
+#one dimension optimization of deck size
+default_card_mean_val = 5.384 #mean card value with face card values = 5
+fx <- seq(0, 100, 4)
+fy <- 1-((default_card_mean_val^2-1)/default_card_mean_val^2)^fx
+plot(fx, fy)
+
+success_function_default_val_mean <- function(N) {
+  x=default_card_mean_val
+  1-((x^2-1)/x^2)^N
+}
+
+optimize(success_function_default_val_mean, lower = 0, upper = 100, maximum=TRUE)
+```
+
+```{r}
+#two dimensional optimization for both card mean average value and sample size
+
+success_function <- function(input) {
+  1-((input[1]^2-1)/input[1]^2)^input[2]
+}
+
+optim(c(4.46,10), success_function, method = "SANN")
+```
 
 http://www.ams.org/publicoutreach/feature-column/fcarc-mulcahy6

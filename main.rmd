@@ -32,20 +32,19 @@ Magician's method: The magician mirrors the same instructions as the victim, als
 ```{r setup, echo = FALSE, message = FALSE, warning = FALSE}
 options(scipen = 1, digits = 4, width = 80)
 library(hashmap)
+library(pracma)
 ```
 
 
 ```{r,eval=TRUE, echo=TRUE, include=TRUE}
-human_distribution <- function(n){
+rhuman <- function(n){
   setwd('.')
   data = as.vector(read.csv(file="data.csv",check.names=FALSE, header=FALSE))
-
   estimators = numeric(10)
   for(i in 1:10){
     estimators[i] = sum(data <= i) / length(data)
   }
   estimators = c(0, estimators)
-
   sample = c()
   for(i in 1:n){
     x = runif(n = 1, min = 0, max = 1)
@@ -58,25 +57,19 @@ human_distribution <- function(n){
 ```{r,eval=TRUE, echo=TRUE, include=TRUE}
 ranks <- c("A",2:10,"J","Q","K")
 cards = paste(rep(ranks, 4), c("H","D","S","C"))
-
 # Create a randomized deck of cards.
 create_shuffled_deck <- function() {
   sample(cards, 52)
 }
-
 # Create a rank value hashmap.
 create_rank_value_map <- function(jack_value, queen_value, king_value) {
   hashmap(ranks, c(c(1:10), jack_value, queen_value, king_value))
 }
-
 # Function to get the value of the card.
 card_value <- function(card, rv_map) {
   rank <- unlist(strsplit(card, " "))[1] # "A H" -> "A"
   rv_map[[rank]]
 }
-
-rv_map <- create_rank_value_map(5, 5, 5)
-card_value("10 H", rv_map)
 ```
 
 ```{r,eval=TRUE, echo=TRUE, include=TRUE}
@@ -92,13 +85,71 @@ calc_key_card <- function(deck, rv_map, start_idx) {
   }
   return(curr_card)
 }
-
-deck <- create_shuffled_deck()
-rv_map <- create_rank_value_map(5, 5, 5)
-
-calc_key_card(deck, rv_map, 1)
-calc_key_card(deck, rv_map, 5)
 ```
+
+```{r,eval=TRUE, echo=TRUE, include=TRUE}
+# Given a number of runs of Kruskal's Count, finds the average probability of success
+# M = Number of Runs
+# values = Facecard Values
+calc_prob_success_human <- function(M, value) {
+  runs = rep(0, M)
+
+  random_start = rhuman(M)
+  for(i in 1:M){
+    deck <- create_shuffled_deck()
+    rv_map <- create_rank_value_map(value, value, value)
+    final_card_one = calc_key_card(deck, rv_map, 1)
+    final_card_two = calc_key_card(deck, rv_map, random_start[i])
+    
+    if( final_card_one == final_card_two){
+      runs[i] <- 1
+    }
+  }
+  
+  
+  return(mean(runs))
+}
+
+calc_prob_success_uniform <- function(M, value) {
+  runs = rep(0, M)
+  
+  random_start = runif(M, 1, 10)
+  for(i in 1:M){
+    deck <- create_shuffled_deck()
+    rv_map <- create_rank_value_map(value, value, value)
+    final_card_one = calc_key_card(deck, rv_map, 1)
+    final_card_two = calc_key_card(deck, rv_map, random_start[i])
+    
+    if( final_card_one == final_card_two){
+      runs[i] <- 1
+    }
+  } 
+  return(mean(runs))
+}
+
+
+```
+
+
+```{r,eval=TRUE, echo=TRUE, include=TRUE}
+face_val = seq(1, 10, 1)
+
+face_val_prob_unif = rep(0, 10)
+face_val_prob_human = rep(0, 10)
+
+# Probability of Success Over 1-10 Values of Face Card with Uniform and Human Distribution
+for(i in 1:10){
+  face_val_prob_unif[i] = calc_prob_success_uniform(1000, face_val[i])
+  face_val_prob_human[i] = calc_prob_success_human(1000, face_val[i])
+
+}
+
+print(cbind(face_val, face_val_prob_unif, face_val_prob_human))
+
+
+
+```
+
 
 ```{r}
 #one dimension optimization of mean average card value
@@ -144,5 +195,6 @@ success_function <- function(input) {
 
 optim(c(4.46,10), success_function, method = "SANN")
 ```
+
 
 http://www.ams.org/publicoutreach/feature-column/fcarc-mulcahy6

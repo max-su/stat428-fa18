@@ -250,9 +250,10 @@ success_function <- function(input) {
 }
 optim(c(4.46,10), success_function, method = "SANN")
 ```
-(results explained)
                                         
 # Simulation using card values assigned by the length of the card name.
+Another variant mentioned in the research paper is if we used a modified hashmap with card values assigned by the length of the card name. For example, the Seven card would have a value of 5, Ace would have a value of 3, etc. This variation results in the highest probability we've seen so far, hovering around ~95%. 
+
 ```{r}
 # Create modified hashmap for card values
 create_spelled_card_values <- function() {

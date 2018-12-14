@@ -45,13 +45,13 @@ To make our simulation realistic, we’re using a dataset consisting of human-se
 ![](https://i.imgur.com/kVFQ3lX.png)
 
 ## Motivation and Problem of Interest
-Given a random deck, and setting the values of our face value cards (King, Queen, Jack) to five, we arrive at a success rate of ~84% [Grime]. The motivation of our simulation is see if we can further optimize our success by modifying the mean card value, the number of cards in the deck, or both. We define the *mean card value* as the average of each card’s numeric value. We manually define the values of Jack, Queen, and King face cards. 
+Given a random deck, and setting the values of our face value cards (King, Queen, Jack) to five, we arrive at a success rate of ~84% [Grime]. The motivation of our simulation is see if we can further optimize our success by modifying the mean card value, the number of cards in the deck, or both. We define the *mean card value* as the average of each card’s numeric value. We manually define the values of Jack, Queen, and King face cards.
 
 # Methods
 ## Random Number Generation
-A key aspect of our simulation is to generate a random deck of cards that we iterate through. 
+A key aspect of our simulation is to generate a random deck of cards that we iterate through.
 ## One-dimensional optimizations
-We attempt to optimize both the mean card value as well as the sample deck size independently in order to maximize the probability of success. 
+We attempt to optimize both the mean card value as well as the sample deck size independently in order to maximize the probability of success.
 According to Grime’s paper, the probability of success can be represented by the probability function
 P(success) = 1-(\frac{x^2-1}{x^2})^2
 
@@ -241,7 +241,7 @@ calc_prob_success_human(100, 4) #mean = 5.15
 calc_prob_success_human(100, 5) #mean = 5.38
 ```
 
-# One-D Average Card Deck Size Optimization
+## One-D Average Card Deck Size Optimization
 Now we will attempt to optimize on the sample size of the deck to maximize the probability of success.
 
 
@@ -309,7 +309,7 @@ The data used to simulate how humans would pick a random starting number from 1 
 https://docs.google.com/spreadsheets/d/1U-6LMy0AtfQB7MSjpNpVgQzVQXHuhJf50mkMTTms2a4/edit?usp=sharing
 
 ## Data Dictionary
-Our data comes in the form of a single column of integer values from 1 to 10. 
+Our data comes in the form of a single column of integer values from 1 to 10.
 
 ## Card Trick Information
 http://www.ams.org/publicoutreach/feature-column/fcarc-mulcahy6

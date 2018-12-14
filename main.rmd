@@ -178,9 +178,9 @@ legend(8, 1, legend=c("Human", "Uniform"), col=c("blue", "green"), lty=1:2, cex=
 
 # Optimizations  
 We attempt to optimize both the mean card value as well as the sample deck size independently in order to maximize the probability of success. 
-According to Grime’s paper, the probability of success can be represented by the probability function:  
+According to Grime’s paper, the probability of success can be represented by the probability function where $x$ is the mean card value and $N$ is the card deck sample size:  
 
-$$P(success) = 1-(\frac{x^2-1}{x^2})^2$$
+$$P(success) = 1-(\frac{x^2-1}{x^2})^N$$
 
 ## One-D Average Card Value Optimization  
 First we will start by optimizing the mean card value. We fix the sample card deck size to a standard 52 card deck. 

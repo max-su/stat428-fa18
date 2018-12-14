@@ -179,13 +179,13 @@ lines(Face_Card_Value, Uniform_Prob, pch=18, col="green", type="b", lty=2)
 legend(8, 1, legend=c("Human", "Uniform"), col=c("blue", "green"), lty=1:2, cex=0.8, title="Distribution Types")
 ```
 
-# One-dimensional optimizations  
+# Optimizations  
 We attempt to optimize both the mean card value as well as the sample deck size independently in order to maximize the probability of success. 
 According to Grime’s paper, the probability of success can be represented by the probability function:  
 
 $$P(success) = 1-(\frac{x^2-1}{x^2})^2$$
 
-## Average Card Value Optimization  
+## One-D Average Card Value Optimization  
 First we will start by optimizing the mean card value. We fix the sample card deck size to a standard 52 card deck. 
 
 ```{r}
@@ -210,7 +210,7 @@ Optim states the function is maximized when the mean card value is reduced at 1.
 optim_average_realistic_card_val = optimize(success_function_standard_deck, lower=4.46, upper = 10, maximum = TRUE)$maximum
 optim_average_realistic_card_val
 ```
-We see now see that the maximizing mean card value is exactly the lower bound. This tells us the probability function is decreasing as the mean card value increases. This makes sense since the smaller variance among cards, the more likely the magician's and audience's card align, and thus leading to Kruskal algorithm converging early. 
+We see now see that the maximizing mean card value is exactly the lower bound. This tells us the probability function is decreasing as the mean card value increases. This makes sense since the smaller variance among cards, the more likely the magician's and participant's card align, and thus leading to Kruskal algorithm converging early. 
 
 We can verify this by running the probability of success function above
 ```{r}
@@ -221,7 +221,7 @@ calc_prob_success_human(100, 4) #mean = 5.15
 calc_prob_success_human(100, 5) #mean = 5.38
 ```
 
-# Average Card Deck Size Optimization
+# One-D Average Card Deck Size Optimization
 Now we will attempt to optimize on the sample size of the deck to maximize the probability of success. 
 
 ```{r}
@@ -230,27 +230,28 @@ fx <- seq(0, 100, 4)
 fy <- 1-((default_card_mean_val^2-1)/default_card_mean_val^2)^fx
 plot(fx, fy)
 ```
-We see that probability function given a fixed mean card value is increasingly asymptotic 
+We see that probability function given a fixed mean card value is increasingly asymptotic as the deck sample size increases. 
 
 ```{r}
 success_function_default_val_mean <- function(N) {
   x=default_card_mean_val
   1-((x^2-1)/x^2)^N
 }
-optimize(success_function_default_val_mean, lower = 0, upper = 100, maximum=TRUE)
+optim_deck_size = optimize(success_function_default_val_mean, lower = 0, upper = 100, maximum=TRUE)$maximum
+optim_deck_size
 ```
+This is no surprise as the larger the sample size, the longer the two markov chains from the magician and participant have to achieve convergence before reaching the end. However, it is not truely optimum to continuously increase the sample deck size at the cost of run time. We can solve this by attempting to optimize on both variables and seeing the most desirable combination.
 
-
-# Two-Dimensional Optimization for Average Value and Sample Size
-(Brief description of function (Adam?))(rename header if it doesnt make sense)
+## Two-D Average Value and Sample Size Optimization
+We use 'optim' to optimize both parameters(mean card value and sample deck size) of the probability success function. The prediction method we use is STATISTICA Automated Neural Networks (SANN) as it works for functions that does not guarantee to converge. SANN also utilizes a machine learning algorithm that can trim noisy outliers. Our initial input paramters is the lowest mean card value with face card values being 1 and 52 card standard deck. 
 ```{r}
 #two dimensional optimization for both card mean average value and sample size
 success_function <- function(input) {
   1-((input[1]^2-1)/input[1]^2)^input[2]
 }
-optim(c(4.46,10), success_function, method = "SANN")
+optim(c(4.46,52), success_function, method = "SANN")
 ```
-(results explained)
+The optimizations generally give a good combination of increasing mean card value while reducing the deck sample size slightly. 
                                         
 # Simulation using card values assigned by the length of the card name.
 ```{r}

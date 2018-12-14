@@ -108,7 +108,7 @@ calc_key_card <- function(deck, rv_map, start_idx) {
 Given a number of runs (M), and a value for the face cards (V), simulates M runs of the card trick and then outputs the probability of success that the magician predicts the correct last card. The first function is based on human data for choosing the first card of the trick, and the second function is based on sampling the first card from a uniform distribution.
 ```{r,eval=TRUE, echo=TRUE, include=TRUE}
 # Runs based on human data
-calc_prob_success_human <- function(M, V) {
+calc_prob_success_human <- function(M, V, rv_map_=NULL) {
   # Will keep track of success of runs, 0 = incorrect prediction, 1 = correct prediction
   runs = rep(0, M)
   # Generate M human samples
@@ -116,7 +116,15 @@ calc_prob_success_human <- function(M, V) {
   # Runs simulation M times and changes the ith value of runs to 1 if the magician predicts the last card correctly
   for(i in 1:M){
     deck <- create_shuffled_deck()
-    rv_map <- create_rank_value_map(V, V, V)
+    
+    # Generate rv_map if not provided
+    if(is.null(rv_map_)){
+      rv_map <- create_rank_value_map(V, V, V)
+    } 
+    else{
+      rv_map = rv_map_ # use provided rv_map
+    }
+    
     final_card_one = calc_key_card(deck, rv_map, 1)
     final_card_two = calc_key_card(deck, rv_map, random_start[i])
     if( final_card_one == final_card_two){
@@ -156,12 +164,13 @@ Human_Prob = rep(0, 10)
 # Probability of Success Over 1-10 Values of Face Card with Uniform and Human Distribution
 for(i in 1:10){
   Uniform_Prob[i] = calc_prob_success_uniform(1000, Face_Card_Value[i])
-  Human_Prob[i] = calc_prob_success_human(1000, Face_Card_Value[i])
+  Human_Prob[i] = calc_prob_success_human(1000, Face_Card_Value[i], rv_map_=NULL)
 }
 ```
 The table and graph below demonstrate the large effect sampling from a human distribution has on the probability of success. Over the 10 values of face cards, there was an average difference of `r mean((Human_Prob - Uniform_Prob))*100`% between the probability of success of the uniform and human distribution. Based on the graph this difference is consistent between many values of face cards and further shows how this study should not be done with a uniform distribution. Conceptually the increased probability of success makes sense for using data from a human distribution. The most common card human's choose is 7 thus most of the samples started at 7. Since the magician is starting at 1, they have a greater chance of their chain matching up with the player's chain of cards due to the average distance between their cards being around 6.   
 
 Looking at the face card values, the data also shows an increased rate of success when face cards have a lower value. Conceptually this makes sense as the lower the face card is, the more cards you have to traverse to get to the ending card and therefore leads to an increased chance of the magician's card chain matching up with the player's card chain. These results suggest that for the magician to have the highest probability of success with the trick, they should give face card's the value of 1 or 2.
+
 ```{r,echo=FALSE}
 # Output Findings
 print(cbind(Face_Card_Value, Uniform_Prob, Human_Prob))
@@ -242,5 +251,30 @@ success_function <- function(input) {
 optim(c(4.46,10), success_function, method = "SANN")
 ```
 (results explained)
+                                        
+# Simulation using card values assigned by the length of the card name.
+```{r}
+# Create modified hashmap for card values
+create_spelled_card_values <- function() {
+  card_names = c("Ace", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten", "Jack", "Queen", "King")
+  num_cards = length(card_names)
+  card_values = numeric(num_cards)
+  for (i in 1:num_cards){
+    card_values[i] = nchar(card_names[i])
+  }
+  hashmap(c("A",2:10,"J","Q","K"), card_values)
+}
+
+spelled_cards_map = create_spelled_card_values()
+
+Face_Card_Value = seq(1, 10, 1) # Values of Face Cards to Test
+Human_Prob = rep(0, 10) # Human Results
+# Probability of Success Over 1-10 Values of Face Card with Uniform and Human Distribution
+for(i in 1:10){
+  Human_Prob[i] = calc_prob_success_human(1000, Face_Card_Value[i], rv_map_ = spelled_cards_map)
+}
+
+print(mean((Human_Prob))*100)
+```
 
 http://www.ams.org/publicoutreach/feature-column/fcarc-mulcahy6

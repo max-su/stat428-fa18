@@ -12,7 +12,7 @@ output:
 
 # Abstract
 
-TODO
+We analyzed this magic trick to calculate the best parameters (card value type and starting point) for the Kruskal's Count card trick to optimize for the highest chance of success. We used a sample of 100 numbers selected by distinct humans from 1 to 10 to compute likelihood estimators for the support of human_distribution PMF for starting point generation and one dimensional optimization. These results suggest that for the magician to have the highest probability of success with the trick, they should give face card’s the value of 1 or 2. Furthermore, we ran one and two dimensional optimization methods on the mean card values and card deck sample size to see parameters the maximize the probability of success for the trick.
 
 # Introduction
 
@@ -38,6 +38,26 @@ The chain ends on the queen of hearts since the victim runs out of cards.
 
 
 As you can see from the example the magician would be correct! To the victim, they "randomly" chose the final card based on the victims random number, and thus the victim is surprised and entertained by the trick. However, diving deeper into this trick we will find there is actually a very high probability of correctly guessing the final card in the sequence and certain factors can even be altered to increase this chance further.
+
+
+## Initial Data Exploration
+To make our simulation realistic, we’re using a dataset consisting of human-selected numbers. The author of the dataset queried real individuals via a web service and asked each one to pick a number between one and ten. This distribution varies from a randomly generated one, as humans are more likely to pick the number seven than not. In our simulation, we resample from this distribution when picking our random starting card.
+![](https://i.imgur.com/kVFQ3lX.png)
+
+## Motivation and Problem of Interest
+Given a random deck, and setting the values of our face value cards (King, Queen, Jack) to five, we arrive at a success rate of ~84% [Grime]. The motivation of our simulation is see if we can further optimize our success by modifying the mean card value, the number of cards in the deck, or both. We define the *mean card value* as the average of each card’s numeric value. We manually define the values of Jack, Queen, and King face cards. 
+
+# Methods
+## Random Number Generation
+A key aspect of our simulation is to generate a random deck of cards that we iterate through. 
+## One-dimensional optimizations
+We attempt to optimize both the mean card value as well as the sample deck size independently in order to maximize the probability of success. 
+According to Grime’s paper, the probability of success can be represented by the probability function
+P(success) = 1-(\frac{x^2-1}{x^2})^2
+
+First we will start by optimizing the mean card value. We fix the sample card deck size to a standard 52 card deck.
+
+
 ```{r setup, echo = FALSE, message = FALSE, warning = FALSE}
 options(scipen = 1, digits = 4, width = 80)
 library(hashmap)
@@ -46,7 +66,7 @@ library(pracma)
 
 # Human Distribution Function
 The “random” way that humans select a number 1 to 10 is for some reason non-uniform, and we wanted to factor this into our simulation to obtain results closest to the real world. We used a sample of 100 numbers selected by distinct humans from 1 to 10 to compute likelihood estimators for the support of human_distribution PMF. Next, we mapped distinct ranges of it’s support to distinct values in the support of our estimated PMF function. The ranges were determined by the likelihood estimators.  This allows us to transform a sample from a random uniform distribution to a sample from our estimated human_distribution, and allows us to create a simulation that is closer to a real-life run of this magic trick.
-![](https://lh3.googleusercontent.com/-O_0S0oKDfXFtH7BiOONGFQiExVuv62xcPI4GkYcjALIewPXT6NqF8XtiJwAg59kTYH9jxh_qcbFLRxW_5nUCqgjX-BuA5uygW8OIYkRGcgOFXDejsgdWVombLBQBibn_AnfAVZl)
+
 ```{r,eval=TRUE, echo=TRUE, include=TRUE}
 rhuman <- function(n){
   setwd('.')
@@ -282,4 +302,16 @@ for(i in 1:10){
 print(mean((Human_Prob))*100)
 ```
 
+
+# Appendix
+## Data Source
+The data used to simulate how humans would pick a random starting number from 1 to 10 was downloaded from this dataset from http://www.anondraw.com using a google form asking users to pick a random number between 1 and 10.
+https://docs.google.com/spreadsheets/d/1U-6LMy0AtfQB7MSjpNpVgQzVQXHuhJf50mkMTTms2a4/edit?usp=sharing
+
+## Data Dictionary
+Our data comes in the form of a single column of integer values from 1 to 10. 
+
+## Card Trick Information
 http://www.ams.org/publicoutreach/feature-column/fcarc-mulcahy6
+James Grime:
+http://singingbanana.com/

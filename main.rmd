@@ -21,25 +21,23 @@ Kruskal's Count is a mathematical magic card trick that we will optimize for the
 ## Card Trick
 
 The magician lays out 52 cards face up like so:
-![](https://qph.fs.quoracdn.net/main-qimg-e03450e6d43d35d11f1fd08111a01e35)   
+![](https://qph.fs.quoracdn.net/main-qimg-e03450e6d43d35d11f1fd08111a01e35)
 
-They then ask their victim to choose a number 1-10. The number they pick corresponds to the first card they choose in the top row. The value of this card is the number of cards they must count before finding their next card in their chain. Whatever card they land on is their new number and the counting process repeats. The victim continues this pattern until they reach their *key card*. The key card is the last card of their chain before they run out of cards. Face cards are given a certain value, say for instance 5.   
+They then ask their victim to choose a number 1-10. The number they pick corresponds to the first card they choose in the top row. The value of this card is the number of cards they must count before finding their next card in their chain. Whatever card they land on is their new number and the counting process repeats. The victim continues this pattern until they reach their *key card*. The key card is the last card of their chain before they run out of cards. Face cards are given a certain value, say for instance 5.
 
-Before the victim chooses a number, the magician slyly starts their own chain in their head that starts from the first card on the table. This chain follows the same process as the victim's and whatever card ends up being their *key card* will be used to predict the final card the victim will land on. 
+Before the victim chooses a number, the magician slyly starts their own chain in their head that starts from the first card on the table. This chain follows the same process as the victim's and whatever card ends up being their *key card* will be used to predict the final card the victim will land on.
 
-**Example:**   
-The magician starts a chain in their head based on the first card: 2 of diamonds.   
-The full chain is: **2(D) -> 8(S) -> 8(D) -> 2(C) -> 7(H) -> 3(H) -> A(H) -> 8(C) -> 9(D) -> Q(H)**   
-The victim chooses the number 7. The 7th card in the top row is 10 of spades.   
-The magician then magically predicts the victim will finish on the queen of hearts.   
-The victim's full chain is: **10(S) -> A(C) -> 3(S) -> 7(H) -> 3(H) -> A(H) -> 8(C) -> 9(D) -> Q(H)**   
-The chain ends on the queen of hearts since the victim runs out of cards.      
-
-
-
-As you can see from the example the magician would be correct! To the victim, they "randomly" chose the final card based on the victims random number, and thus the victim is surprised and entertained by the trick. However, diving deeper into this trick we will find there is actually a very high probability of correctly guessing the final card in the sequence and certain factors can even be altered to increase this chance further.   
+**Example:**
+The magician starts a chain in their head based on the first card: 2 of diamonds.
+The full chain is: **2(D) -> 8(S) -> 8(D) -> 2(C) -> 7(H) -> 3(H) -> A(H) -> 8(C) -> 9(D) -> Q(H)**
+The victim chooses the number 7. The 7th card in the top row is 10 of spades.
+The magician then magically predicts the victim will finish on the queen of hearts.
+The victim's full chain is: **10(S) -> A(C) -> 3(S) -> 7(H) -> 3(H) -> A(H) -> 8(C) -> 9(D) -> Q(H)**
+The chain ends on the queen of hearts since the victim runs out of cards.
 
 
+
+As you can see from the example the magician would be correct! To the victim, they "randomly" chose the final card based on the victims random number, and thus the victim is surprised and entertained by the trick. However, diving deeper into this trick we will find there is actually a very high probability of correctly guessing the final card in the sequence and certain factors can even be altered to increase this chance further.
 ```{r setup, echo = FALSE, message = FALSE, warning = FALSE}
 options(scipen = 1, digits = 4, width = 80)
 library(hashmap)
@@ -47,7 +45,7 @@ library(pracma)
 ```
 
 # Human Distribution Function
-(Explain here what this does and why its an example of a random number generation. (Kasi?))
+The “random” way that humans select a number 1 to 10 is for some reason non-uniform, and we wanted to factor this into our simulation to obtain results closest to the real world. We used a sample of 100 numbers selected by distinct humans from 1 to 10 to compute likelihood estimators for the support of human_distribution PMF. Next, we mapped distinct ranges of it’s support to distinct values in the support of our estimated PMF function. The ranges were determined by the likelihood estimators.  This allows us to transform a sample from a random uniform distribution to a sample from our estimated human_distribution, and allows us to create a simulation that is closer to a real-life run of this magic trick.
 ```{r,eval=TRUE, echo=TRUE, include=TRUE}
 rhuman <- function(n){
   setwd('.')
@@ -68,7 +66,7 @@ rhuman <- function(n){
 ```
 
 # Card Generation and Sampling Functions
-(Explain here what this does and why its example of sampling (Max?))
+We sample from a deck of cards without replacement and create helper functions to manage card values for the simulation.
 ```{r,eval=TRUE, echo=TRUE, include=TRUE}
 ranks <- c("A",2:10,"J","Q","K")
 cards = paste(rep(ranks, 4), c("H","D","S","C"))
@@ -88,14 +86,12 @@ card_value <- function(card, rv_map) {
 ```
 
 # Kruskal Simulation Function
-(Brief description of what it does (can probably use comments below...))
+Calculates the key card (perhaps the last card in the deck) which is not followed by enough cards to get to another one. Given an initital deck, a rank value map, and the initial number from 1-10.
 ```{r,eval=TRUE, echo=TRUE, include=TRUE}
-# Calculates the key card (perhaps the last card in the deck) which is not followed by enough cards to get to another one.
-# Given an initital deck, a rank value map, and the initial number from 1-10.
 calc_key_card <- function(deck, rv_map, start_idx) {
   curr_card <- deck[start_idx]
   index <- start_idx
-  
+
   while(index + card_value(curr_card, rv_map) <= 52) {
     index <- index + card_value(curr_card, rv_map)
     curr_card <- deck[index]
@@ -116,15 +112,15 @@ calc_prob_success_human <- function(M, V, rv_map_=NULL) {
   # Runs simulation M times and changes the ith value of runs to 1 if the magician predicts the last card correctly
   for(i in 1:M){
     deck <- create_shuffled_deck()
-    
+
     # Generate rv_map if not provided
     if(is.null(rv_map_)){
       rv_map <- create_rank_value_map(V, V, V)
-    } 
+    }
     else{
       rv_map = rv_map_ # use provided rv_map
     }
-    
+
     final_card_one = calc_key_card(deck, rv_map, 1)
     final_card_two = calc_key_card(deck, rv_map, random_start[i])
     if( final_card_one == final_card_two){
@@ -147,7 +143,7 @@ calc_prob_success_uniform <- function(M, value) {
     if( final_card_one == final_card_two){
       runs[i] <- 1
     }
-  } 
+  }
   return(mean(runs))
 }
 ```
@@ -167,7 +163,7 @@ for(i in 1:10){
   Human_Prob[i] = calc_prob_success_human(1000, Face_Card_Value[i], rv_map_=NULL)
 }
 ```
-The table and graph below demonstrate the large effect sampling from a human distribution has on the probability of success. Over the 10 values of face cards, there was an average difference of `r mean((Human_Prob - Uniform_Prob))*100`% between the probability of success of the uniform and human distribution. Based on the graph this difference is consistent between many values of face cards and further shows how this study should not be done with a uniform distribution. Conceptually the increased probability of success makes sense for using data from a human distribution. The most common card human's choose is 7 thus most of the samples started at 7. Since the magician is starting at 1, they have a greater chance of their chain matching up with the player's chain of cards due to the average distance between their cards being around 6.   
+The table and graph below demonstrate the large effect sampling from a human distribution has on the probability of success. Over the 10 values of face cards, there was an average difference of `r mean((Human_Prob - Uniform_Prob))*100`% between the probability of success of the uniform and human distribution. Based on the graph this difference is consistent between many values of face cards and further shows how this study should not be done with a uniform distribution. Conceptually the increased probability of success makes sense for using data from a human distribution. The most common card human's choose is 7 thus most of the samples started at 7. Since the magician is starting at 1, they have a greater chance of their chain matching up with the player's chain of cards due to the average distance between their cards being around 6.
 
 Looking at the face card values, the data also shows an increased rate of success when face cards have a lower value. Conceptually this makes sense as the lower the face card is, the more cards you have to traverse to get to the ending card and therefore leads to an increased chance of the magician's card chain matching up with the player's card chain. These results suggest that for the magician to have the highest probability of success with the trick, they should give face card's the value of 1 or 2.
 
@@ -179,6 +175,7 @@ lines(Face_Card_Value, Uniform_Prob, pch=18, col="green", type="b", lty=2)
 legend(8, 1, legend=c("Human", "Uniform"), col=c("blue", "green"), lty=1:2, cex=0.8, title="Distribution Types")
 ```
 
+
 # Optimizations  
 We attempt to optimize both the mean card value as well as the sample deck size independently in order to maximize the probability of success. 
 According to Grime’s paper, the probability of success can be represented by the probability function:  
@@ -188,7 +185,8 @@ $$P(success) = 1-(\frac{x^2-1}{x^2})^2$$
 ## One-D Average Card Value Optimization  
 First we will start by optimizing the mean card value. We fix the sample card deck size to a standard 52 card deck. 
 
-```{r}
+
+```{r,eval=TRUE, echo=TRUE, include=TRUE}
 #one dimension optimization of mean average card value
 fx <- seq(1, 10, 1)
 fy <- 1-((fx^2-1)/fx^2)^52
@@ -197,7 +195,7 @@ plot(fx, fy)
 
 From the plot we see the maximum is achieved betwen the interval (1,4). Thus we run optim with those boundaries.
 
-```{r}
+```{r,eval=TRUE, echo=TRUE, include=TRUE}
 success_function_standard_deck <- function(x) {
   1-((x^2-1)/x^2)^52
 }
@@ -205,15 +203,16 @@ optim_average_card_val = optimize(success_function_standard_deck, lower=1, upper
 optim_average_card_val
 ```
 
-Optim states the function is maximized when the mean card value is reduced at 1.304. However, it is unrealistic to reduce all cards values close to 1, thus, we set the lower bound of the optimization to be the card average when face cards are counted as value 1. 
-```{r}
+Optim states the function is maximized when the mean card value is reduced at 1.304. However, it is unrealistic to reduce all cards values close to 1, thus, we set the lower bound of the optimization to be the card average when face cards are counted as value 1.
+```{r,eval=TRUE, echo=TRUE, include=TRUE}
 optim_average_realistic_card_val = optimize(success_function_standard_deck, lower=4.46, upper = 10, maximum = TRUE)$maximum
 optim_average_realistic_card_val
 ```
+
 We see now see that the maximizing mean card value is exactly the lower bound. This tells us the probability function is decreasing as the mean card value increases. This makes sense since the smaller variance among cards, the more likely the magician's and participant's card align, and thus leading to Kruskal algorithm converging early. 
 
 We can verify this by running the probability of success function above
-```{r}
+```{r,eval=TRUE, echo=TRUE, include=TRUE}
 calc_prob_success_human(100, 1) #mean = 4.46
 calc_prob_success_human(100, 2) #mean = 4.69
 calc_prob_success_human(100, 3) #mean = 4.92
@@ -224,15 +223,18 @@ calc_prob_success_human(100, 5) #mean = 5.38
 # One-D Average Card Deck Size Optimization
 Now we will attempt to optimize on the sample size of the deck to maximize the probability of success. 
 
-```{r}
+
+```{r,eval=TRUE, echo=TRUE, include=TRUE}
 default_card_mean_val = 5.384 #mean card value with face card values = 5
 fx <- seq(0, 100, 4)
 fy <- 1-((default_card_mean_val^2-1)/default_card_mean_val^2)^fx
 plot(fx, fy)
 ```
+
 We see that probability function given a fixed mean card value is increasingly asymptotic as the deck sample size increases. 
 
-```{r}
+
+```{r,eval=TRUE, echo=TRUE, include=TRUE}
 success_function_default_val_mean <- function(N) {
   x=default_card_mean_val
   1-((x^2-1)/x^2)^N
@@ -244,8 +246,7 @@ This is no surprise as the larger the sample size, the longer the two markov cha
 
 ## Two-D Average Value and Sample Size Optimization
 We use 'optim' to optimize both parameters(mean card value and sample deck size) of the probability success function. The prediction method we use is STATISTICA Automated Neural Networks (SANN) as it works for functions that does not guarantee to converge. SANN also utilizes a machine learning algorithm that can trim noisy outliers. Our initial input paramters is the lowest mean card value with face card values being 1 and 52 card standard deck. 
-```{r}
-#two dimensional optimization for both card mean average value and sample size
+```{r,eval=TRUE, echo=TRUE, include=TRUE}
 success_function <- function(input) {
   1-((input[1]^2-1)/input[1]^2)^input[2]
 }
@@ -254,7 +255,9 @@ optim(c(4.46,52), success_function, method = "SANN")
 The optimizations generally give a good combination of increasing mean card value while reducing the deck sample size slightly. 
                                         
 # Simulation using card values assigned by the length of the card name.
-```{r}
+Another variant mentioned in the research paper is if we used a modified hashmap with card values assigned by the length of the card name. For example, the Seven card would have a value of 5, Ace would have a value of 3, etc. This variation results in the highest probability we've seen so far, hovering around ~95%.
+
+```{r,eval=TRUE, echo=TRUE, include=TRUE}
 # Create modified hashmap for card values
 create_spelled_card_values <- function() {
   card_names = c("Ace", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten", "Jack", "Queen", "King")

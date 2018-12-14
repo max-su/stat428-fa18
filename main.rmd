@@ -220,7 +220,7 @@ calc_prob_success_human(100, 4) #mean = 5.15
 calc_prob_success_human(100, 5) #mean = 5.38
 ```
 
-# One-D Average Card Deck Size Optimization
+## One-D Average Card Deck Size Optimization
 Now we will attempt to optimize on the sample size of the deck to maximize the probability of success. 
 
 
